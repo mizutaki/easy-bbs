@@ -2,21 +2,23 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Main Page</title>
+	<% @store.each { |content|  %>
 	<hr>
 	<table>
 		<tr>
 			<th>お名前：</th>
 			<td>
-				<%=@name %>
+				<%=content[:name] %>
 			</td>
 		</tr>
 		<tr>
 			<th>メッセージ：</th>
 			<td>
-				<%=@message %>
+				<%=content[:message] %>
 			</td>
 		</tr>
 	</table>
 	<hr>
+	<% } %>
 	<a href="/main">戻る</a>
 </html>

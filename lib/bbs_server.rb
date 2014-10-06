@@ -1,5 +1,7 @@
 require 'sinatra'
 
+store = []
+
 get '/'  do
 	erb :index
 end
@@ -9,7 +11,10 @@ get '/main' do
 end
 
 post '/write' do
-	@name = params[:name]
-	@message = params[:message]
+	content = {}
+	content[:name] = params[:name]
+	content[:message] = params[:message]
+	store << content
+	@store = store.clone
 	erb :write
 end
