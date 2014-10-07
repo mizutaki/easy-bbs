@@ -6,15 +6,21 @@
 	<hr>
 	<table>
 		<tr>
+			<th>投稿時刻：</th>
+			<td>
+				<%=content.get_write_date %>
+			</td>
+		</tr>
+		<tr>
 			<th>お名前：</th>
 			<td>
-				<%=content[:name] %>
+				<%=content.get_name %>
 			</td>
 		</tr>
 		<tr>
 			<th>メッセージ：</th>
 			<td>
-				<%=content[:message] %>
+				<%=content.get_message %>
 			</td>
 		</tr>
 	</table>
