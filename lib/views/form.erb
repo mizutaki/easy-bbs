@@ -9,22 +9,41 @@
 	<tr>
 		<th>お名前：</th>
 		<td>
-			<input type="text" name="name" value="" />
+			<input type="text" id="name" name="name" value="" />
 		</td>
 	</tr>
 	<tr>
 		<th>メッセージ：</th>
 		<td>
-			<textarea name="message" cols=50 rows=5></textarea>
+			<textarea id="message" name="message" cols=50 rows=5></textarea>
 		</td>
 	</tr>
 	<tr>
 		<td>
-			<input type="submit"  name="button" value="投稿" />
+			<input type="submit"  name="button" value="投稿" onclick="return validate();" />
 		</td>
 	</tr>
 </table>
 <%= yield %>
+<script>
+function validate() {
+	var name = document.getElementById('name');
+	var message = document.getElementById('message');
+	var error_message = "";
+	if (!name.value) {
+		error_message += 'お名前を入力して下さい。\n';
+	}
+	if (!message.value) {
+		error_message += 'メッセージを入力して下さい。\n';
+	}
+	if (!error_message) {
+	return true;
+	} else {
+		alert(error_message);
+		return false;
+	}
+}
+</script>
 </form>
 </body>
 </html>
