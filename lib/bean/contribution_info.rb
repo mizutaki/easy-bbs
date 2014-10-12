@@ -1,10 +1,14 @@
 class ContributionInfo
-
-	attr_reader :name, :message, :write_date
-	def initialize(name, message, write_date)
+	attr_reader :contribution_number, :name, :message, :write_date
+	def initialize(contribution_number, name, message, write_date)
+		@contribution_number = contribution_number
 		@name = name
 		@message = message
 		@write_date = write_date
+	end
+
+	def get_contribution_number
+		@contribution_number
 	end
 
 	def get_name
