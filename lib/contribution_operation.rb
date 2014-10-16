@@ -1,10 +1,10 @@
 class ContributionOperation
 	attr_accessor :current_page, :contribution_number, :start_message, :message_item, :store
 	def initialize
-		@store = ['no use zero'] #0番目の要素は使用しない
+		@store = []
 		@current_page = 1
 		@contribution_number = 0
-		@start_message = 1
+		@start_message = 0
 		@message_item = 10
 	end
 
