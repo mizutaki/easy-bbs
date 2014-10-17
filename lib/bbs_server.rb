@@ -8,8 +8,20 @@ get '/'  do
 	erb :index, :layout => false
 end
 
-get '/main' do
-	erb :main, :layout => :form
+get '/login' do
+	username = false
+	password = false
+	if params[:username] =~ /admin/ #dummy
+		username = true
+	end
+	if params[:password] =~/admin/ #dummy
+		password = true
+	end
+	if username && password
+		erb :main, :layout => :form
+	else
+		erb :account
+	end
 end
 
 post '/write' do
