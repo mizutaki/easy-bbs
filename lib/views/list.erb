@@ -2,22 +2,22 @@
 <hr>
 <table>
 	<tr>
-		[<%= content.get_contribution_number %>]
+		[<%= content[:contribution_number] %>]
 		<th>投稿時刻：</th>
 		<td>
-			<%=content.get_write_date %>
+			<%=content[:write_date] %>
 		</td>
 	</tr>
 	<tr>
 		<th>お名前：</th>
 		<td>
-			<%=content.get_name %>
+			<%=content[:name] %>
 		</td>
 	</tr>
 	<tr>
 		<th>メッセージ：</th>
 		<td>
-			<%=content.get_message %>
+			<%=content[:message] %>
 		</td>
 	</tr>
 </table>

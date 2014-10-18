@@ -1,6 +1,17 @@
 require 'sinatra'
-require_relative 'bean/contribution_info'
+require 'data_mapper'
+require 'sinatra/reloader'
 require_relative 'contribution_operation'
+
+DataMapper::setup(:default, "sqlite3://#{Dir.pwd}/bbs_data.db")
+class ContributionInfo
+	include DataMapper::Resource
+	property :contribution_number, Serial #auto-incrementing key
+	property :name, String, :required => true #cannot be null
+	property :message, Text, :required => true
+	property :write_date, String
+end
+DataMapper.finalize.auto_upgrade!
 
 operation = ContributionOperation.new
 
@@ -25,11 +36,10 @@ get '/login' do
 end
 
 post '/write' do
-	content = ContributionInfo.new(operation.contribution_number += 1, params[:name], params[:message],Time.now.strftime('%Y/%m/%d %H:%M:%S'))
-	operation.store.unshift(content)
-	@store = operation.store[0, 10]
+	ContributionInfo.create(:name => params[:name], :message => params[:message], :write_date => Time.now.strftime('%Y/%m/%d %H:%M:%S'))
+	@store = ContributionInfo.all(:order => [:contribution_number.desc])
 	@current_page = operation.current_page
-	erb :write, :layout => :form
+	erb :list, :layout => :form
 end
 
 get '/next/:page' do
