@@ -1,7 +1,7 @@
 require 'sinatra'
 require 'data_mapper'
 require 'sinatra/reloader'
-require_relative 'contribution_operation'
+#require_relative 'contribution_operation'
 
 DataMapper::setup(:default, "sqlite3://#{Dir.pwd}/bbs_data.db")
 class ContributionInfo
@@ -13,7 +13,8 @@ class ContributionInfo
 end
 DataMapper.finalize.auto_upgrade!
 
-operation = ContributionOperation.new
+first_message = 0
+last_message = 0
 
 get '/'  do
 	erb :index, :layout => false
@@ -29,7 +30,9 @@ get '/login' do
 		password = true
 	end
 	if username && password
-		erb :main, :layout => :form
+		@store = ContributionInfo.all(:order => [:contribution_number.desc], :limit => 10)
+		last_message = @store.last[:contribution_number]
+		erb :list, :layout => :form
 	else
 		erb :account
 	end
@@ -37,19 +40,21 @@ end
 
 post '/write' do
 	ContributionInfo.create(:name => params[:name], :message => params[:message], :write_date => Time.now.strftime('%Y/%m/%d %H:%M:%S'))
-	@store = ContributionInfo.all(:order => [:contribution_number.desc])
-	@current_page = operation.current_page
+	new_message = ContributionInfo.all(:order => [:contribution_number.desc], :limit => 10)
+	if new_message.blank?
+		new_message = ContributionInfo.all(:order => [:contribution_number.desc], :limit => 10)
+	end
+	@store = new_message#降順の最新10件
+	last_message = @store.last[:contribution_number] 
 	erb :list, :layout => :form
 end
 
-get '/next/:page' do
-	@store  = operation.next
-	@current_page = operation.current_page
-	erb :write, :layout => :form
-end
-
-get '/prev' do
-	@store = operation.prev
-	@current_page = operation.current_page
-	erb :write, :layout => :form
+get '/next' do
+	next_message = ContributionInfo.all(:contribution_number.lt => last_message, :order => [:contribution_number.desc], :limit => 10)
+	if next_message.blank?
+		next_message = ContributionInfo.all(:contribution_number.lt => last_message, :order => [:contribution_number.desc], :limit => 10)
+	end
+	@store  = next_message
+	last_message = @store.last[:contribution_number]
+	erb :list, :layout => :form
 end
