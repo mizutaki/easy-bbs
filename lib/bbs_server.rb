@@ -1,8 +1,20 @@
 require 'sinatra'
-require_relative 'bean/contribution_info'
-require_relative 'contribution_operation'
+require 'data_mapper'
+require 'sinatra/reloader'
+#require_relative 'contribution_operation'
 
-operation = ContributionOperation.new
+DataMapper::setup(:default, "sqlite3://#{Dir.pwd}/bbs_data.db")
+class ContributionInfo
+	include DataMapper::Resource
+	property :contribution_number, Serial #auto-incrementing key
+	property :name, String, :required => true #cannot be null
+	property :message, Text, :required => true
+	property :write_date, String
+end
+DataMapper.finalize.auto_upgrade!
+
+first_message = 0
+last_message = 0
 
 get '/'  do
 	erb :index, :layout => false
@@ -18,28 +30,31 @@ get '/login' do
 		password = true
 	end
 	if username && password
-		erb :main, :layout => :form
+		@store = ContributionInfo.all(:order => [:contribution_number.desc], :limit => 10)
+		last_message = @store.last[:contribution_number]
+		erb :list, :layout => :form
 	else
 		erb :account
 	end
 end
 
 post '/write' do
-	content = ContributionInfo.new(operation.contribution_number += 1, params[:name], params[:message],Time.now.strftime('%Y/%m/%d %H:%M:%S'))
-	operation.store.unshift(content)
-	@store = operation.store[0, 10]
-	@current_page = operation.current_page
-	erb :write, :layout => :form
+	ContributionInfo.create(:name => params[:name], :message => params[:message], :write_date => Time.now.strftime('%Y/%m/%d %H:%M:%S'))
+	new_message = ContributionInfo.all(:order => [:contribution_number.desc], :limit => 10)
+	if new_message.blank?
+		new_message = ContributionInfo.all(:order => [:contribution_number.desc], :limit => 10)
+	end
+	@store = new_message#降順の最新10件
+	last_message = @store.last[:contribution_number] 
+	erb :list, :layout => :form
 end
 
-get '/next/:page' do
-	@store  = operation.next
-	@current_page = operation.current_page
-	erb :write, :layout => :form
-end
-
-get '/prev' do
-	@store = operation.prev
-	@current_page = operation.current_page
-	erb :write, :layout => :form
+get '/next' do
+	next_message = ContributionInfo.all(:contribution_number.lt => last_message, :order => [:contribution_number.desc], :limit => 10)
+	if next_message.blank?
+		next_message = ContributionInfo.all(:contribution_number.lt => last_message, :order => [:contribution_number.desc], :limit => 10)
+	end
+	@store  = next_message
+	last_message = @store.last[:contribution_number]
+	erb :list, :layout => :form
 end
