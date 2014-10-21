@@ -58,3 +58,17 @@ get '/next' do
 	last_message = @store.last[:contribution_number]
 	erb :list, :layout => :form
 end
+
+get '/prev' do
+	prev_message = ContributionInfo.all(:contribution_number.gt => last_message, :limit => 10)
+	if prev_message.blank?
+		prev_message = ContributionInfo.all(:contribution_number.gt => last_message, :limit => 10)
+	end
+	reverse = []
+	prev_message.each do |message|
+		reverse.unshift(message)
+	end
+	@store = reverse
+	last_message = @store.first[:contribution_number]
+	erb :list, :layout => :form
+end
