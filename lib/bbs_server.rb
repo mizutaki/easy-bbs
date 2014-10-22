@@ -13,8 +13,8 @@ class ContributionInfo
 end
 DataMapper.finalize.auto_upgrade!
 
-first_message = 0
 last_message = 0
+current_page = 0
 
 get '/'  do
 	erb :index, :layout => false
@@ -32,6 +32,8 @@ get '/login' do
 	if username && password
 		@store = ContributionInfo.all(:order => [:contribution_number.desc], :limit => 10)
 		last_message = @store.last[:contribution_number]
+		current_page = 1
+		@current_page = current_page
 		erb :list, :layout => :form
 	else
 		erb :account
@@ -46,6 +48,8 @@ post '/write' do
 	end
 	@store = new_message#降順の最新10件
 	last_message = @store.last[:contribution_number] 
+	current_page = 1
+	@current_page = current_page
 	erb :list, :layout => :form
 end
 
@@ -56,5 +60,25 @@ get '/next' do
 	end
 	@store  = next_message
 	last_message = @store.last[:contribution_number]
+	current_page += 1
+	@current_page = current_page
+	erb :list, :layout => :form
+end
+
+get '/prev' do
+	prev_message = ContributionInfo.all(:contribution_number.gt => last_message, :limit => 10)
+	if prev_message.blank?
+		prev_message = ContributionInfo.all(:contribution_number.gt => last_message, :limit => 10)
+	end
+	reverse = []
+	prev_message.each do |message|
+		reverse.unshift(message)
+	end
+	@store = reverse
+	last_message = @store.first[:contribution_number]
+	if current_page != 1
+		current_page -=1
+		@current_page = current_page
+	end
 	erb :list, :layout => :form
 end
