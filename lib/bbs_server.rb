@@ -1,7 +1,6 @@
 require 'sinatra'
 require 'data_mapper'
 require 'sinatra/reloader'
-#require_relative 'contribution_operation'
 
 DataMapper::setup(:default, "sqlite3://#{Dir.pwd}/bbs_data.db")
 class ContributionInfo
@@ -13,6 +12,7 @@ class ContributionInfo
 end
 DataMapper.finalize.auto_upgrade!
 
+first_message = 0
 last_message = 0
 current_page = 0
 
@@ -31,7 +31,13 @@ get '/login' do
 	end
 	if username && password
 		@store = ContributionInfo.all(:order => [:contribution_number.desc], :limit => 10)
-		last_message = @store.last[:contribution_number]
+		p @store
+		if @store.nil? == false
+			first_message = @store.first[:contribution_number]
+			last_message = @store.last[:contribution_number]
+			p first_message
+			p last_message
+		end
 		current_page = 1
 		@current_page = current_page
 		erb :list, :layout => :form
@@ -47,7 +53,8 @@ post '/write' do
 		new_message = ContributionInfo.all(:order => [:contribution_number.desc], :limit => 10)
 	end
 	@store = new_message#降順の最新10件
-	last_message = @store.last[:contribution_number] 
+	first_message = @store.first[:contribution_number]
+	last_message = @store.last[:contribution_number]
 	current_page = 1
 	@current_page = current_page
 	erb :list, :layout => :form
@@ -59,6 +66,7 @@ get '/next' do
 		next_message = ContributionInfo.all(:contribution_number.lt => last_message, :order => [:contribution_number.desc], :limit => 10)
 	end
 	@store  = next_message
+	first_message = @store.first[:contribution_number]
 	last_message = @store.last[:contribution_number]
 	current_page += 1
 	@current_page = current_page
@@ -66,16 +74,17 @@ get '/next' do
 end
 
 get '/prev' do
-	prev_message = ContributionInfo.all(:contribution_number.gt => last_message, :limit => 10)
+	prev_message = ContributionInfo.all(:contribution_number.gt => first_message, :limit => 10)
 	if prev_message.blank?
-		prev_message = ContributionInfo.all(:contribution_number.gt => last_message, :limit => 10)
+		prev_message = ContributionInfo.all(:contribution_number.gt => first_message, :limit => 10)
 	end
 	reverse = []
 	prev_message.each do |message|
 		reverse.unshift(message)
 	end
 	@store = reverse
-	last_message = @store.first[:contribution_number]
+	first_message = @store.first[:contribution_number]
+	last_message = @store.last[:contribution_number]
 	if current_page != 1
 		current_page -=1
 		@current_page = current_page
