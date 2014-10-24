@@ -6,6 +6,7 @@ DataMapper::setup(:default, "sqlite3://#{Dir.pwd}/bbs_data.db")
 class ContributionInfo
 	include DataMapper::Resource
 	property :contribution_number, Serial #auto-incrementing key
+	property :title, String
 	property :name, String, :required => true #cannot be null
 	property :message, Text, :required => true
 	property :write_date, String
@@ -47,7 +48,10 @@ get '/login' do
 end
 
 post '/write' do
-	ContributionInfo.create(:name => params[:name], :message => params[:message], :write_date => Time.now.strftime('%Y/%m/%d %H:%M:%S'))
+	if params[:title].empty?
+		 params[:title] = 'notitle'
+	end
+	ContributionInfo.create(:title => params[:title], :name => params[:name], :message => params[:message], :write_date => Time.now.strftime('%Y/%m/%d %H:%M:%S'))
 	new_message = ContributionInfo.all(:order => [:contribution_number.desc], :limit => 10)
 	if new_message.blank?
 		new_message = ContributionInfo.all(:order => [:contribution_number.desc], :limit => 10)

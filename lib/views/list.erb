@@ -2,7 +2,13 @@
 <hr>
 <table>
 	<tr>
-		[<%= content[:contribution_number] %>]
+		<td>
+			[<%= content[:contribution_number] %>]
+			<%= content[:title] %>
+			<a href="/reply/<%= content[:contribution_number]%>">返信</a>
+		</td>
+	</tr>
+	<tr>
 		<th>投稿時刻：</th>
 		<td>
 			<%=content[:write_date] %>
