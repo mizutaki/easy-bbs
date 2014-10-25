@@ -49,6 +49,13 @@ function validate() {
 		return false;
 	}
 }
+function reply(title, message) {
+	alert(title + message);
+	var title_form = document.getElementById('title');
+	var message_form = document.getElementById('message');
+	title_form.value = 'Re:>' + title;
+	message_form.value = 'Re:>' + message;
+}
 </script>
 </form>
 </body>
