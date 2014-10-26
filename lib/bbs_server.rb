@@ -1,6 +1,8 @@
 require 'sinatra'
 require 'data_mapper'
 require 'sinatra/reloader'
+require 'logger'
+require 'fileutils'
 
 DataMapper::setup(:default, "sqlite3://#{Dir.pwd}/bbs_data.db")
 class ContributionInfo
@@ -16,12 +18,16 @@ DataMapper.finalize.auto_upgrade!
 first_message = 0
 last_message = 0
 current_page = 0
+FileUtils.mkdir('logs') unless FileTest.exist?('logs')
+log = Logger.new("logs/access.log")
 
 get '/'  do
 	erb :index, :layout => false
 end
 
 get '/login' do
+	log.debug(@env["REQUEST_URI"])
+
 	username = false
 	password = false
 	if params[:username] =~ /admin/ #dummy
@@ -36,8 +42,6 @@ get '/login' do
 		if @store.nil? == false
 			first_message = @store.first[:contribution_number]
 			last_message = @store.last[:contribution_number]
-			p first_message
-			p last_message
 		end
 		current_page = 1
 		@current_page = current_page
@@ -48,6 +52,8 @@ get '/login' do
 end
 
 post '/write' do
+	log.debug(@env["REQUEST_URI"])
+	log.debug(params)
 	if params[:title].empty?
 		 params[:title] = 'notitle'
 	end
@@ -65,6 +71,7 @@ post '/write' do
 end
 
 get '/next' do
+	log.debug(@env["REQUEST_URI"])
 	next_message = ContributionInfo.all(:contribution_number.lt => last_message, :order => [:contribution_number.desc], :limit => 10)
 	if next_message.blank?
 		next_message = ContributionInfo.all(:contribution_number.lt => last_message, :order => [:contribution_number.desc], :limit => 10)
@@ -78,6 +85,7 @@ get '/next' do
 end
 
 get '/prev' do
+	log.debug(@env["REQUEST_URI"])
 	prev_message = ContributionInfo.all(:contribution_number.gt => first_message, :limit => 10)
 	if prev_message.blank?
 		prev_message = ContributionInfo.all(:contribution_number.gt => first_message, :limit => 10)
