@@ -3,7 +3,6 @@ require 'data_mapper'
 require 'sinatra/reloader'
 require 'logger'
 require 'fileutils'
-
 DataMapper::setup(:default, "sqlite3://#{Dir.pwd}/bbs_data.db")
 class ContributionInfo
 	include DataMapper::Resource
@@ -25,9 +24,8 @@ get '/'  do
 	erb :index, :layout => false
 end
 
-get '/login' do
+post '/login' do
 	log.debug(@env["REQUEST_URI"])
-
 	username = false
 	password = false
 	if params[:username] =~ /admin/ #dummy
